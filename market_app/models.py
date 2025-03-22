@@ -25,12 +25,12 @@ class Product(models.Model):
     name = models.CharField(max_length=225)
     description = models.TextField()
     price = models.DecimalField(max_digits=50, decimal_places=2)
-    market = models.ForeignKey(
+    markets = models.ForeignKey(
         Market, on_delete=models.CASCADE, related_name="products"
     )
-    seller = models.ForeignKey(
+    sellers = models.ForeignKey(
         Seller, on_delete=models.CASCADE, related_name="products"
     )
 
     def __str__(self):  # damit in DB anzeigen lassen
-        return f"{self.name} ({self.price})"
+        return f"{self.name}"
