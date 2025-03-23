@@ -16,7 +16,7 @@ def market_view(request):
     if request.method == "GET":
         markets = Market.objects.all()
         serializer = MarketHyperLinkedSerializer(
-            markets, many=True, context={"request": request}
+            markets, many=True, context={"request": request}, fields=("id", "url")
         )
         return Response(serializer.data)
 
