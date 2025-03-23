@@ -10,9 +10,9 @@ from .views import (
 
 urlpatterns = [
     path("market/", market_view),
-    path("market/<int:pk>/", market_single_view),
+    path("market/<int:pk>/", market_single_view, name="market-detail"),
     path("seller/", seller_view),
-    path("seller/<int:pk>/", seller_single_view),
+    path("seller/<int:pk>/", seller_single_view, name="seller_single_view"),
     path("product/", product_view),
     # path("product/<int:pk>/", product_single_view),
 ]

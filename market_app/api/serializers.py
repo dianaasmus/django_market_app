@@ -2,11 +2,14 @@ from rest_framework import serializers
 from market_app.models import Market, Seller, Product
 
 
-class MarketSerializer(serializers.ModelSerializer):
+class MarketSerializer(serializers.HyperlinkedModelSerializer):
+    sellers = serializers.HyperlinkedRelatedField(
+        many=True, read_only=True, view_name="seller_single_view"
+    )
+
     class Meta:
         model = Market
-        fields = ["name", "location", "description", "net_worth"]
-        # exclude = ["id"]
+        exclude = []
 
     def validate_name(self, value):
         errors = []
