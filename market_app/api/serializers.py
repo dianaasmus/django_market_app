@@ -2,10 +2,8 @@ from rest_framework import serializers
 from market_app.models import Market, Seller, Product
 
 
-class MarketSerializer(serializers.HyperlinkedModelSerializer):
-    sellers = serializers.HyperlinkedRelatedField(
-        many=True, read_only=True, view_name="seller_single_view"
-    )
+class MarketSerializer(serializers.ModelSerializer):
+    sellers = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Market
@@ -23,6 +21,15 @@ class MarketSerializer(serializers.HyperlinkedModelSerializer):
             raise serializers.ValidationError(errors)
 
         return value
+
+
+class MarketHyperLinkedSerializer(
+    MarketSerializer, serializers.HyperlinkedModelSerializer
+):
+
+    class Meta:
+        model = Market
+        exclude = []
 
 
 class SellerSerializer(serializers.ModelSerializer):

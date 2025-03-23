@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .serializers import (
     MarketSerializer,
     SellerSerializer,
-    SellerDeserializer,
+    MarketHyperLinkedSerializer,
     ProductDeserializer,
 )
 from market_app.models import Market, Seller, Product
@@ -15,7 +15,9 @@ def market_view(request):
 
     if request.method == "GET":
         markets = Market.objects.all()
-        serializer = MarketSerializer(markets, many=True, context={"request": request})
+        serializer = MarketHyperLinkedSerializer(
+            markets, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
     elif request.method == "POST":
@@ -36,7 +38,7 @@ def market_single_view(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = MarketSerializer(market)
+        serializer = MarketSerializer(market, context={"request": request})
         return Response(serializer.data)
 
     elif request.method == "DELETE":
