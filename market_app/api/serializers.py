@@ -28,9 +28,14 @@ class SellerSerializer(serializers.ModelSerializer):
         queryset=Market.objects.all(), many=True, write_only=True, source="markets"
     )
 
+    market_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Seller
-        fields = "__all__"
+        fields = ["id", "name", "contact_info", "market_count", "markets", "market_ids"]
+
+    def get_market_count(self, obj):
+        return obj.markets.count()
 
 
 class SellerDeserializer(serializers.ModelSerializer):
