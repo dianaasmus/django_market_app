@@ -62,7 +62,7 @@ def seller_view(request):
         return Response(serializer.data)
 
     elif request.method == "POST":
-        serializer = SellerDeserializer(data=request.data)
+        serializer = SellerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -86,7 +86,7 @@ def seller_single_view(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     elif request.method == "PUT":
-        serializer = SellerDeserializer(seller, data=request.data, partial=True)
+        serializer = SellerSerializer(seller, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

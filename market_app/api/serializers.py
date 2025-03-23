@@ -22,13 +22,18 @@ class MarketSerializer(serializers.ModelSerializer):
         return value
 
 
-class SellerSerializer(serializers.Serializer):
+class SellerSerializer(serializers.ModelSerializer):
+    markets = MarketSerializer(many=True, read_only=True)
+    market_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Market.objects.all(), many=True, write_only=True, source="markets"
+    )
+
     class Meta:
         model = Seller
         fields = "__all__"
 
 
-class SellerDeserializer(serializers.Serializer):
+class SellerDeserializer(serializers.ModelSerializer):
     class Meta:
         model: Seller
         fields = "__all__"
