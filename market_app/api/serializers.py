@@ -25,9 +25,7 @@ class MarketSerializer(serializers.ModelSerializer):
         return value
 
 
-class MarketHyperLinkedSerializer(
-    MarketSerializer, serializers.HyperlinkedModelSerializer
-):
+class MarketHyperLinkedSerializer(MarketSerializer, serializers.ModelSerializer):
     sellers = serializers.HyperlinkedRelatedField(
         many=True, view_name="seller_single_view", read_only=True
     )
@@ -58,7 +56,7 @@ class MarketHyperLinkedSerializer(
         ]
 
 
-class SellerSerializer(serializers.HyperlinkedRelatedField):
+class SellerSerializer(serializers.ModelSerializer):
     markets = serializers.HyperlinkedRelatedField(
         many=True, view_name="market-detail", read_only=True
     )
@@ -76,16 +74,14 @@ class SellerSerializer(serializers.HyperlinkedRelatedField):
         return obj.markets.count()
 
 
+# class ProductSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Product
+#         fields = "__all__"
+
+
 class ProductSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Product
-        fields = "__all__"
-
-
-class ProductHyperLinkedSerializer(
-    ProductSerializer, serializers.HyperlinkedModelSerializer
-):
     market = serializers.HyperlinkedRelatedField(
         view_name="market-detail", read_only=True
     )

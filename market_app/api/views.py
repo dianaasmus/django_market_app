@@ -7,14 +7,18 @@ from .serializers import (
     SellerSerializer,
     MarketHyperLinkedSerializer,
     ProductSerializer,
-    ProductHyperLinkedSerializer,
 )
 from market_app.models import Market, Seller, Product
 from rest_framework import mixins, generics
+from django.http import Http404
+
+from market_app.api import serializers
 
 
 class MarketView(
-    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
+    mixins.ListModelMixin,  # Ermöglicht das Abrufen einer Liste von Market-Objekten (GET)
+    mixins.CreateModelMixin,  # Ermöglicht das Erstellen neuer Market-Objekte (POST)
+    generics.GenericAPIView,  # Stellt Grundfunktionen für DRF-Views bereit, wie queryset, serializer_class, get_serializer(), etc.
 ):
     queryset = Market.objects.all()
     serializer_class = MarketHyperLinkedSerializer
@@ -26,130 +30,150 @@ class MarketView(
         return self.create(request, *args, **kwargs)
 
 
-# @api_view(["GET", "POST"])
-# def market_view(request):
+class MarketSingleView(
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+):
+    serializer_class = MarketSerializer
 
-#     if request.method == "GET":
-#         markets = Market.objects.all()
-#         serializer = MarketHyperLinkedSerializer(
-#             markets, many=True, context={"request": request}
-#         )
-#         return Response(serializer.data)
+    def get_object(self, pk):
+        try:
+            return Market.objects.get(pk=pk)
+        except Market.DoesNotExist:
+            raise Http404
 
-#     elif request.method == "POST":
-#         serializer = MarketSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# Single View
-@api_view(["GET", "DELETE", "PUT"])
-def market_single_view(request, pk):
-
-    try:
-        market = Market.objects.get(pk=pk)
-    except Market.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == "GET":
+    def get(self, request, pk):
+        market = self.get_object(pk)
         serializer = MarketHyperLinkedSerializer(market, context={"request": request})
         return Response(serializer.data)
 
-    elif request.method == "DELETE":
+    def delete(self, pk):
+        market = self.get_object(pk)
         market.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    elif request.method == "PUT":
-        serializer = MarketSerializer(market, data=request.data, partial=True)
+    def put(self, request, pk):
+        market = self.get_object(pk)
+        serializer = MarketSerializer(market, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data, status=status.HTTP_200_OK
-            )  #!!! sonst bei error status 200
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST"])
-def seller_view(request):
+class SellersView(
+    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
+):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
 
-    if request.method == "GET":
-        sellers = Seller.objects.all()
-        serializer = SellerSerializer(sellers, many=True)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-    elif request.method == "POST":
-        serializer = SellerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
-@api_view(["GET", "DELETE", "PUT"])
-def seller_single_view(request, pk):
+class SellerSingleView(
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+):
+    serializer_class = SellerSerializer
 
-    try:
-        seller = Seller.objects.get(pk=pk)
-    except Seller.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    def get_object(self, pk):
+        try:
+            return Seller.objects.get(pk=pk)
+        except Seller.DoesNotExist:
+            raise Http404
 
-    if request.method == "GET":
+    def get(self, request, pk):
+        seller = self.get_object(pk)
         serializer = SellerSerializer(seller, context={"request": request})
         return Response(serializer.data)
 
-    elif request.method == "DELETE":
+    def delete(self, pk):
+        seller = self.get_object(pk)
         seller.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    elif request.method == "PUT":
-        serializer = SellerSerializer(seller, data=request.data, partial=True)
+    def put(self, request, pk):
+        seller = self.get_object(pk)
+        serializer = SellerSerializer(seller, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST"])
-def product_view(request):
+class ProductView(
+    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
+):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-    if request.method == "GET":
-        products = Product.objects.all()
-        serializer = ProductHyperLinkedSerializer(
-            products, many=True, context={"request": request}
-        )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+# @api_view(["GET", "PUT", "DELETE"])
+# def product_single_view(request, pk):
+
+#     try:
+#         products = Product.objects.get(pk=pk)
+#     except Seller.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+
+#     if request.method == "GET":
+#         serializer = ProductSerializer(products, context={"request": request})
+#         return Response(serializer.data)
+
+#     elif request.method == "DELETE":
+#         products.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+#     elif request.method == "PUT":
+#         serializer = ProductSerializer(products, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProductSingleView(
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+):
+    serializer_class = ProductSerializer
+
+    def get_object(self, pk):
+        try:
+            return Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        product = self.get_object(pk)
+        serializer = ProductSerializer(product, context={"request": request})
         return Response(serializer.data)
 
-    elif request.method == "POST":
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["GET", "PUT", "DELETE"])
-def product_single_view(request, pk):
-
-    try:
-        products = Product.objects.get(pk=pk)
-    except Seller.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == "GET":
-        serializer = ProductHyperLinkedSerializer(
-            products, context={"request": request}
-        )
-        return Response(serializer.data)
-
-    elif request.method == "DELETE":
-        products.delete()
+    def delete(self, pk):
+        product = self.get_object(pk)
+        product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    elif request.method == "PUT":
-        serializer = ProductSerializer(products, data=request.data, partial=True)
+    def put(self, request, pk):
+        product = self.get_object(pk)
+        serializer = ProductSerializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
