@@ -10,23 +10,20 @@ from .serializers import (
     ProductHyperLinkedSerializer,
 )
 from market_app.models import Market, Seller, Product
+from rest_framework import mixins, generics
 
 
-class MarketView(APIView):
+class MarketView(
+    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
+):
+    queryset = Market.objects.all()
+    serializer_class = MarketHyperLinkedSerializer
 
-    def get(self, request):
-        markets = Market.objects.all()
-        serializer = MarketHyperLinkedSerializer(
-            markets, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-    def post(self, request):
-        serializer = MarketSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 # @api_view(["GET", "POST"])
