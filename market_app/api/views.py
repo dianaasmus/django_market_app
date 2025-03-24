@@ -1,3 +1,4 @@
+from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -11,22 +12,39 @@ from .serializers import (
 from market_app.models import Market, Seller, Product
 
 
-@api_view(["GET", "POST"])
-def market_view(request):
+class MarketView(APIView):
 
-    if request.method == "GET":
+    def get(self, request):
         markets = Market.objects.all()
         serializer = MarketHyperLinkedSerializer(
             markets, many=True, context={"request": request}
         )
         return Response(serializer.data)
 
-    elif request.method == "POST":
+    def post(self, request):
         serializer = MarketSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# @api_view(["GET", "POST"])
+# def market_view(request):
+
+#     if request.method == "GET":
+#         markets = Market.objects.all()
+#         serializer = MarketHyperLinkedSerializer(
+#             markets, many=True, context={"request": request}
+#         )
+#         return Response(serializer.data)
+
+#     elif request.method == "POST":
+#         serializer = MarketSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Single View
