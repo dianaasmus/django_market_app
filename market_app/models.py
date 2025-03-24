@@ -25,10 +25,10 @@ class Product(models.Model):
     name = models.CharField(max_length=225)
     description = models.TextField()
     price = models.DecimalField(max_digits=50, decimal_places=2)
-    markets = models.ForeignKey(
+    market = models.ForeignKey(
         Market, on_delete=models.CASCADE, related_name="products"
     )
-    sellers = models.ForeignKey(
+    seller = models.ForeignKey(
         Seller, on_delete=models.CASCADE, related_name="products"
     )
 

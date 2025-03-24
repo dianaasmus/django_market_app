@@ -5,7 +5,7 @@ from .views import (
     seller_view,
     seller_single_view,
     product_view,
-    # product_single_view,
+    product_single_view,
 )
 
 urlpatterns = [
@@ -14,5 +14,5 @@ urlpatterns = [
     path("seller/", seller_view),
     path("seller/<int:pk>/", seller_single_view, name="seller_single_view"),
     path("product/", product_view),
-    # path("product/<int:pk>/", product_single_view),
+    path("product/<int:pk>/", product_single_view, name="product-detail"),
 ]

@@ -5,7 +5,8 @@ from .serializers import (
     MarketSerializer,
     SellerSerializer,
     MarketHyperLinkedSerializer,
-    ProductDeserializer,
+    ProductSerializer,
+    ProductHyperLinkedSerializer,
 )
 from market_app.models import Market, Seller, Product
 
@@ -16,7 +17,7 @@ def market_view(request):
     if request.method == "GET":
         markets = Market.objects.all()
         serializer = MarketHyperLinkedSerializer(
-            markets, many=True, context={"request": request}, fields=("id", "url")
+            markets, many=True, context={"request": request}
         )
         return Response(serializer.data)
 
@@ -38,7 +39,7 @@ def market_single_view(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = MarketSerializer(market, context={"request": request})
+        serializer = MarketHyperLinkedSerializer(market, context={"request": request})
         return Response(serializer.data)
 
     elif request.method == "DELETE":
@@ -100,12 +101,40 @@ def product_view(request):
 
     if request.method == "GET":
         products = Product.objects.all()
-        serializer = ProductDeserializer(products, many=True)
+        serializer = ProductHyperLinkedSerializer(
+            products, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
     elif request.method == "POST":
-        serializer = ProductDeserializer(data=request.data)
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET", "PUT", "DELETE"])
+def product_single_view(request, pk):
+
+    try:
+        products = Product.objects.get(pk=pk)
+    except Seller.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = ProductHyperLinkedSerializer(
+            products, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    elif request.method == "DELETE":
+        products.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    elif request.method == "PUT":
+        serializer = ProductSerializer(products, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
