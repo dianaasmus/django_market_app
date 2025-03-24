@@ -1,4 +1,3 @@
-from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -12,55 +11,19 @@ from market_app.models import Market, Seller, Product
 from rest_framework import mixins, generics
 from django.http import Http404
 
-from market_app.api import serializers
-
 
 class MarketView(
-    mixins.ListModelMixin,  # Ermöglicht das Abrufen einer Liste von Market-Objekten (GET)
-    mixins.CreateModelMixin,  # Ermöglicht das Erstellen neuer Market-Objekte (POST)
-    generics.GenericAPIView,  # Stellt Grundfunktionen für DRF-Views bereit, wie queryset, serializer_class, get_serializer(), etc.
-):
+    generics.ListAPIView, generics.CreateAPIView, generics.DestroyAPIView
+):  # ListAPI erwartet mehrere markets
     queryset = Market.objects.all()
     serializer_class = MarketHyperLinkedSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
 
 class MarketSingleView(
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    generics.GenericAPIView,
-):
-    serializer_class = MarketSerializer
-
-    def get_object(self, pk):
-        try:
-            return Market.objects.get(pk=pk)
-        except Market.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        market = self.get_object(pk)
-        serializer = MarketHyperLinkedSerializer(market, context={"request": request})
-        return Response(serializer.data)
-
-    def delete(self, pk):
-        market = self.get_object(pk)
-        market.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def put(self, request, pk):
-        market = self.get_object(pk)
-        serializer = MarketSerializer(market, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView
+):  # Retrive erwartet pk
+    queryset = Market.objects.all()
+    serializer_class = MarketHyperLinkedSerializer
 
 
 class SellersView(
