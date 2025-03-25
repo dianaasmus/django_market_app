@@ -10,17 +10,9 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
 
-class ProductViewSet(viewsets.ViewSet):
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-
-    def list(self, request):
-        serializer = ProductSerializer(self.queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        product = get_object_or_404(self.queryset, pk=pk)
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
+    serializer_class = ProductSerializer
 
 
 class MarketView(generics.ListCreateAPIView, generics.DestroyAPIView):
