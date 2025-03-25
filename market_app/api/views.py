@@ -1,16 +1,26 @@
 from .serializers import (
-    ProductHyperLinkedSerializer,
     SellerSerializer,
     MarketHyperLinkedSerializer,
     ProductSerializer,
     SellerListSerializer,
 )
 from market_app.models import Market, Seller, Product
-from rest_framework import generics
+from rest_framework import generics, viewsets
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 
-class ProductViewSet:
-    pass
+class ProductViewSet(viewsets.ViewSet):
+    queryset = Product.objects.all()
+
+    def list(self, request):
+        serializer = ProductSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        product = get_object_or_404(self.queryset, pk=pk)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
 
 
 class MarketView(generics.ListCreateAPIView, generics.DestroyAPIView):
@@ -47,20 +57,20 @@ class SellerSingleView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SellerSerializer
 
 
-class ProductView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
+# class ProductView(generics.ListCreateAPIView):
+#     queryset = Product.objects.all()
 
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return ProductSerializer
-        return ProductHyperLinkedSerializer
+#     def get_serializer_class(self):
+#         if self.request.method == "POST":
+#             return ProductSerializer
+#         return ProductHyperLinkedSerializer
 
 
-class ProductSingleView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductHyperLinkedSerializer
+# class ProductSingleView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductHyperLinkedSerializer
 
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return ProductHyperLinkedSerializer
-        return ProductSerializer
+#     def get_serializer_class(self):
+#         if self.request.method == "GET":
+#             return ProductHyperLinkedSerializer
+#         return ProductSerializer
