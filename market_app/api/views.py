@@ -3,6 +3,7 @@ from .serializers import (
     SellerSerializer,
     MarketHyperLinkedSerializer,
     ProductSerializer,
+    SellerListSerializer,
 )
 from market_app.models import Market, Seller, Product
 from rest_framework import generics
@@ -16,6 +17,20 @@ class MarketView(generics.ListCreateAPIView, generics.DestroyAPIView):
 class MarketSingleView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Market.objects.all()
     serializer_class = MarketHyperLinkedSerializer
+
+
+class MarketSellerView(generics.ListCreateAPIView):
+    serializer_class = SellerListSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        market = Market.objects.get(pk=pk)
+        return market.sellers.all()
+
+    def perform_create(self, serializer):
+        pk = self.kwargs.get("pk")
+        market = Market.objects.get(pk=pk)
+        serializer.save(markets=[market])
 
 
 class SellersView(generics.ListAPIView, generics.CreateAPIView):

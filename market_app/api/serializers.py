@@ -2,10 +2,32 @@ from rest_framework import serializers
 from market_app.models import Market, Seller, Product
 
 
-class MarketSerializer(serializers.ModelSerializer):
-    sellers = serializers.PrimaryKeyRelatedField(
-        queryset=Seller.objects.all(), many=True, required=False
+class SellerSerializer(serializers.ModelSerializer):
+    markets = serializers.HyperlinkedRelatedField(
+        many=True, view_name="market-detail", read_only=True
     )
+    market_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Market.objects.all(), many=True, write_only=True, source="markets"
+    )
+
+    market_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Seller
+        fields = ["id", "name", "contact_info", "market_count", "markets", "market_ids"]
+
+    def get_market_count(self, obj):
+        return obj.markets.count()
+
+
+class SellerListSerializer(SellerSerializer, serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = ["name", "contact_info", "market_count", "markets", "market_ids"]
+
+
+class MarketSerializer(serializers.ModelSerializer):
+    sellers = SellerSerializer(many=True, read_only=True)
 
     class Meta:
         model = Market
@@ -26,9 +48,7 @@ class MarketSerializer(serializers.ModelSerializer):
 
 
 class MarketHyperLinkedSerializer(MarketSerializer, serializers.ModelSerializer):
-    sellers = serializers.HyperlinkedRelatedField(
-        many=True, view_name="seller-detail", read_only=True
-    )
+    # sellers = serializers.(read_only=True)
 
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
@@ -54,24 +74,6 @@ class MarketHyperLinkedSerializer(MarketSerializer, serializers.ModelSerializer)
             "description",
             "net_worth",
         ]
-
-
-class SellerSerializer(serializers.ModelSerializer):
-    markets = serializers.HyperlinkedRelatedField(
-        many=True, view_name="market-detail", read_only=True
-    )
-    market_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Market.objects.all(), many=True, write_only=True, source="markets"
-    )
-
-    market_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Seller
-        fields = ["id", "name", "contact_info", "market_count", "markets", "market_ids"]
-
-    def get_market_count(self, obj):
-        return obj.markets.count()
 
 
 class ProductHyperLinkedSerializer(serializers.ModelSerializer):
