@@ -9,6 +9,10 @@ from market_app.models import Market, Seller, Product
 from rest_framework import generics
 
 
+class ProductViewSet:
+    pass
+
+
 class MarketView(generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = Market.objects.all()
     serializer_class = MarketHyperLinkedSerializer

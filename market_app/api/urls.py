@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
     MarketView,
     MarketSingleView,
@@ -7,9 +7,18 @@ from .views import (
     ProductView,
     ProductSingleView,
     MarketSellerView,
+    ProductViewSet,
 )
+from rest_framework import routers
+
+router = routers.SimpleRouter()
+router.register(
+    r"product",
+    ProductViewSet,  # r = raw string (Ohne r könnten Backslashes (\) als Escape-Sequenzen interpretiert werden, wodurch der String möglicherweise ungewollt formatiert wird.)
+)  # erzeugt automatisch mehrere URLs für ProductViewSet
 
 urlpatterns = [
+    path("", include(router.urls)),
     path("market/", MarketView.as_view()),
     path("market/<int:pk>/", MarketSingleView.as_view(), name="market-detail"),
     path("seller/", SellersView.as_view()),
